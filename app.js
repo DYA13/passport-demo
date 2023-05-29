@@ -1,12 +1,12 @@
 require("dotenv").config();
 const express = require("express");
-const path = require("path");
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
+const MongoDBStore = require("connect-mongodb-session")(session);
 
 //MONGO
 const mongoDb = process.env.MONGO_URI;
@@ -16,8 +16,6 @@ mongoose.connect(mongoDb, {
 });
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "mongo connection error"));
-
-const MongoDBStore = require("connect-mongodb-session")(session);
 
 var store = new MongoDBStore({
   uri: process.env.MONGO_URI,
@@ -53,7 +51,6 @@ const app = express();
 app.set("views", __dirname);
 app.set("view engine", "ejs");
 
-app.use(passport.initialize());
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -62,8 +59,9 @@ app.use(
     store: store,
   })
 );
-app.use(passport.initialize());
+
 app.use(passport.session());
+app.use(passport.initialize());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(function (req, res, next) {
@@ -80,7 +78,14 @@ app.get("/", (req, res) => {
   res.render("index", { messages });
 });
 
-app.get("/sign-up", (req, res) => res.render("sign-up-form"));
+app.get("/sign-up", (req, res) => {
+  let messages = [];
+  if (req.session.messages) {
+    messages = req.session.messages;
+    req.session.messages = [];
+  }
+  res.render("sign-up-form", { messages });
+});
 
 app.get("/log-out", (req, res) => {
   req.session.destroy(function (err) {
