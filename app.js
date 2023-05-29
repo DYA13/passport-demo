@@ -60,8 +60,8 @@ app.use(
   })
 );
 
-app.use(passport.session());
 app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(function (req, res, next) {
