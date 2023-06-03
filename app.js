@@ -111,6 +111,10 @@ app.post("/sign-up", async (req, res, next) => {
     });
     res.redirect("/");
   } catch (err) {
+    if (!req.session.messages) {
+      req.session.messages = [];
+    }
+    req.session.messages.push(err.message);
     return next(err);
   }
 });
