@@ -30,8 +30,14 @@ store.on("error", function (error) {
 const User = mongoose.model(
   "User",
   new Schema({
-    username: { type: String, required: true },
-    password: { type: String, required: true },
+    username: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
   })
 );
 
@@ -62,7 +68,11 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.urlencoded({ extended: false }));
+app.use(
+  express.urlencoded({
+    extended: false,
+  })
+);
 
 app.use(function (req, res, next) {
   res.locals.user = req.user;
@@ -75,7 +85,9 @@ app.get("/", (req, res) => {
     messages = req.session.messages;
     req.session.messages = [];
   }
-  res.render("index", { messages });
+  res.render("index", {
+    messages,
+  });
 });
 
 app.get("/sign-up", (req, res) => {
@@ -84,7 +96,9 @@ app.get("/sign-up", (req, res) => {
     messages = req.session.messages;
     req.session.messages = [];
   }
-  res.render("sign-up-form", { messages });
+  res.render("sign-up-form", {
+    messages,
+  });
 });
 
 app.get("/log-out", (req, res) => {
@@ -99,7 +113,9 @@ app.get("/restricted", authMiddleware, (req, res) => {
   } else {
     req.session.pageCount++;
   }
-  res.render("restricted", { pageCount: req.session.pageCount });
+  res.render("restricted", {
+    pageCount: req.session.pageCount,
+  });
 });
 
 app.post("/sign-up", async (req, res, next) => {
@@ -131,15 +147,21 @@ app.post(
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
-      const user = await User.findOne({ username: username });
+      const user = await User.findOne({
+        username: username,
+      });
       if (!user) {
-        return done(null, false, { message: "Incorrect username" });
+        return done(null, false, {
+          message: "Incorrect username",
+        });
       }
       bcrypt.compare(password, user.password, (err, result) => {
         if (result) {
           return done(null, user);
         } else {
-          return done(null, false, { message: "Incorrect password" });
+          return done(null, false, {
+            message: "Incorrect password",
+          });
         }
       });
     } catch (err) {
